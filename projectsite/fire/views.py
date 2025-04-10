@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic.list import ListView
 from fire.models import Locations, Incident, FireStation
 
-
+    #return JsonResponse(result)
 class HomePageView(ListView):
     model = Locations
     context_object_name = 'home'
@@ -15,8 +15,11 @@ def map_station(request):
     for fs in fireStations:
         fs['latitude'] = float(fs['latitude'])
         fs['longitude'] = float(fs['longitude'])
+    
     fireStations_list = list(fireStations)
 
     context = {
-    'fireStations': fireStations_list,
-}
+        'fireStations': fireStations_list,
+    }
+
+    return render(request, 'map_station.html', context)
