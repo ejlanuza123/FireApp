@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 sidebar">
+            <h2>Fire Incident Map</h2>
+            <form method="get" class="filter-form">
+                <div class="form-group">
+                    <label for="city">Filter by City:</label>
+                    <select name="city" id="city" class="form-control">
+                        <option value="">All Cities</option>
+                        {% for city in cities %}
+                            <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>
+                                {{ city }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Apply Filter</button>
+            </form>
+            
+            <div class="legend mt-4">
+                <h5>Map Legend:</h5>
+                <div><span class="legend-icon incident-marker"></span> Fire Incident</div>
+                <div><span class="legend-icon station-marker"></span> Fire Station</div>
+                <div class="severity-legend">
+                    <div><span class="severity-minor"></span> Minor Fire</div>
+                    <div><span class="severity-moderate"></span> Moderate Fire</div>
+                    <div><span class="severity-major"></span> Major Fire</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div id="map" style="height: 80vh;"></div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<style>
+    .legend-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        border-radius: 50%;
+    }
+    .incident-marker { background-color: #ff0000; }
+    .station-marker { background-color: #0000ff; }
+    .severity-legend span {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        margin-right: 5px;
+    }
+    .severity-minor { background-color: #ffcc00; }
+    .severity-moderate { background-color: #ff6600; }
+    .severity-major { background-color: #cc0000; }
+</style>
+
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([9.8, 118.7], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Add fire stations to map
+    {% for station in stations %}
+    L.marker([{{ station.latitude }}, {{ station.longitude }}], {
+        icon: L.divIcon({
+            className: 'station-icon',
+            html: '<div style="background-color: blue; border-radius: 50%; width: 12px; height: 12px;"></div>'
+        })
+    }).addTo(map)
+    .bindPopup(`
+        <b>Fire Station: {{ station.name }}</b><br>
+        <b>City:</b> {{ station.city }}
+    `);
+    {% endfor %}
+
+    // Add incidents to map with severity-based coloring
+    {% for incident in incidents %}
+    var severityColor = 
+        {% if incident.severity == 'Minor Fire' %}'#ffcc00'{% endif %}
+        {% if incident.severity == 'Moderate Fire' %}'#ff6600'{% endif %}
+        {% if incident.severity == 'Major Fire' %}'#cc0000'{% endif %};
+    
+    L.circleMarker([{{ incident.latitude }}, {{ incident.longitude }}], {
+        radius: 8,
+        fillColor: severityColor,
+        color: '#000',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    }).addTo(map)
+    .bindPopup(`
+        <b>Fire Incident</b><br>
+        <b>Severity:</b> {{ incident.severity }}<br>
+        <b>Date:</b> {{ incident.date }}<br>
+        <b>Location:</b> {{ incident.address }}, {{ incident.city }}<br>
+        <p>{{ incident.description }}</p>
+    `);
+    {% endfor %}
+</script>
+{% endblock %}
