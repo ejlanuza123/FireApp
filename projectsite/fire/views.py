@@ -13,8 +13,8 @@ from fire.forms import *
 from typing import Any
 from django.db.models.query import QuerySet
 from django.db.models import Q
-
-
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 class ChartView(ListView):
     template_name = 'chart.html'
 
@@ -440,3 +440,33 @@ class FirefightersDelete(DeleteView):
     model = Firefighters
     template_name = "firefighters_delete.html"
     success_url = reverse_lazy('firefighters-list')
+    
+def incident_map_view(request):
+    cities = Incident.objects.values_list('city', flat=True).distinct()
+    stations = FireStation.objects.all()
+
+    locations = []
+    for station in FireStation.objects.all():
+        incidents = Incident.objects.filter(fire_station=station)
+        incident_list = [{
+            'description': i.description,
+            'severity_level': i.severity,
+            'date_time': i.date_time.strftime('%Y-%m-%d %H:%M')
+        } for i in incidents]
+
+        if incidents.exists():
+            locations.append({
+                'name': station.name,
+                'latitude': station.latitude,
+                'longitude': station.longitude,
+                'city': station.city,
+                'severity_level': incidents.latest('date_time').severity,  # or any logic
+                'incidents': incident_list
+            })
+
+    context = {
+        'distinct_cities': cities,
+        'locations': json.dumps(locations, cls=DjangoJSONEncoder),
+        'stations': stations
+    }
+    return render(request, 'your_template.html', context)
