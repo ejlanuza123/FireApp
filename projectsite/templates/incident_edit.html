@@ -1,0 +1,52 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="content">
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">Fire Incidents</h4>
+            <ul class="breadcrumbs">
+                <li class="nav-home">
+                    <a href="{%url 'dashboard-chart' %}">
+                    <i class="flaticon-home"></i>
+                    </a>
+                </li>
+                <li class="separator">
+                    <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'incident-list' %}">Fire Incidents</a>
+                </li>
+                <li class="separator">
+                    <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Edit</a>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Edit Fire Incident</div>
+                        <div class="card-category">Modify fire incident information</div>
+                    </div>
+
+                    <div class="col-md-6">
+                    <div class="card-body">
+                        <form action="" method="post" novalidate>
+                            {% csrf_token %} {% include 'includes/form.html' %}
+
+                            <div class="form-group">
+                                <div class="col-md-12 col-sm-3">
+                                    <button type="submit" class="btn btn-primary btn-rounded">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
