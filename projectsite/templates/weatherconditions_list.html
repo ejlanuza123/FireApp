@@ -116,7 +116,7 @@
         
         // Initialize and show the toast
         const toastElement = document.getElementById('toast-container').lastElementChild;
-        const toast = new bootstrap.Toast(toastElement);
+        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
         toast.show();
         {% endfor %}
     });
